@@ -12,3 +12,5 @@
 *__pycache__*
 *ckpt*
 *.ts
+.DS_Store
+deep_sort/deep_sort/deep/checkpoint/SLOWFAST_8x8_R50_DETECTION.pyth
