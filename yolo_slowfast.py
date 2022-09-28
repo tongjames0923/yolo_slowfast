@@ -75,7 +75,9 @@ def save_yolopreds_tovideo(yolo_preds,id_to_ava_labels,color_map,output_video):
         output_video.write(im.astype(np.uint8))
 
 def main(config):
-    model = torch.hub.load('ultralytics/yolov5', 'yolov5l6')
+
+    #初始化配置
+    model = torch.hub.load('ultralytics/yolov5', 'yolov5s')
     model.conf = config.conf
     model.iou = config.iou
     model.max_det = 200
@@ -83,18 +85,22 @@ def main(config):
         model.classes = config.classes
     device = config.device
     imsize = config.imsize
-    video_model = slowfast_r50_detection(True).eval().to(torch.device("mps"))
+    video_model = slowfast_r50_detection(True).eval().to(device)
+    
     deepsort_tracker = DeepSort("deep_sort/deep_sort/deep/checkpoint/ckpt.t7")
     ava_labelnames,_ = AvaLabeledVideoFramePaths.read_label_map("selfutils/temp.pbtxt")
-    coco_color_map = [[random.randint(0, 255) for _ in range(3)] for _ in range(80)]
 
+
+
+    coco_color_map = [[random.randint(0, 255) for _ in range(3)] for _ in range(80)]
     vide_save_path = config.output
     video=cv2.VideoCapture(config.input)
-    width,height = int(video.get(3)),int(video.get(4))
+    width,height = int(video.get(3)),int(video.get(4))#获取视频宽高
     video.release()
     outputvideo = cv2.VideoWriter(vide_save_path,cv2.VideoWriter_fourcc(*'mp4v'), 25, (width,height))
     print("processing...")
     
+    #读取视频数据
     video = pytorchvideo.data.encoded_video.EncodedVideo.from_path(config.input)
     a=time.time()
     for i in range(0,math.ceil(video.duration),1):
@@ -143,8 +149,8 @@ if __name__=="__main__":
     parser.add_argument('--output', type=str, default="output.mp4", help='folder to save result imgs, can not use input folder')
     # object detect config
     parser.add_argument('--imsize', type=int, default=640, help='inference size (pixels)')
-    parser.add_argument('--conf', type=float, default=0.4, help='object confidence threshold')
-    parser.add_argument('--iou', type=float, default=0.4, help='IOU threshold for NMS')
+    parser.add_argument('--conf', type=float, default=0.6, help='object confidence threshold')
+    parser.add_argument('--iou', type=float, default=0.6, help='IOU threshold for NMS')
     parser.add_argument('--device', default='cuda', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     parser.add_argument('--classes', nargs='+', type=int, help='filter by class: --class 0, or --class 0 2 3')
     config = parser.parse_args()
