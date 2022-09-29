@@ -72,7 +72,9 @@ def save_yolopreds_tovideo(yolo_preds,id_to_ava_labels,color_map,output_video):
                 text = '{} {} {}'.format(int(trackid),yolo_preds.names[int(cls)],ava_label)
                 color = color_map[int(cls)]
                 im = plot_one_box(box,im,color,text)
+
         output_video.write(im.astype(np.uint8))
+
 
 def main(config):
 
@@ -111,7 +113,10 @@ def main(config):
         img_num=video_clips.shape[1]
         imgs=[]
         for j in range(img_num):
+            
             imgs.append(tensor_to_numpy(video_clips[:,j,:,:]))
+            
+
         yolo_preds=model(imgs, size=imsize)
         yolo_preds.files=[f"img_{i*25+k}.jpg" for k in range(img_num)]
 
@@ -145,15 +150,16 @@ def main(config):
     
 if __name__=="__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--input', type=str, default="/home/wufan/images/video/vad.mp4", help='test imgs folder or video or camera')
+    parser.add_argument('--input', type=str, default="/Users/abstergo/Downloads/test.mp4", help='test imgs folder or video or camera')
     parser.add_argument('--output', type=str, default="output.mp4", help='folder to save result imgs, can not use input folder')
     # object detect config
     parser.add_argument('--imsize', type=int, default=640, help='inference size (pixels)')
     parser.add_argument('--conf', type=float, default=0.6, help='object confidence threshold')
     parser.add_argument('--iou', type=float, default=0.6, help='IOU threshold for NMS')
-    parser.add_argument('--device', default='cuda', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
+    parser.add_argument('--device', default='cpu', help='cuda device, i.e. 0 or 0,1,2,3 or cpu')
     parser.add_argument('--classes', nargs='+', type=int, help='filter by class: --class 0, or --class 0 2 3')
     config = parser.parse_args()
     
     print(config)
     main(config)
+    #cv2.destroyAllWindows()
